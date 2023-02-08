@@ -64,7 +64,8 @@
         .btn-save {
             background-color: rgb(115, 161, 84);
         }
-        #cardBody{
+
+        #cardBody {
             padding: 20px;
         }
 
@@ -90,7 +91,7 @@
     </style>
     <script>
         $(document).ready(function () {
-          showCards();
+            showCards();
 
         });
         //카드 보여주기
@@ -99,105 +100,111 @@
             $('#card-list').empty()
             $.ajax({
                 type: "GET",
-                url: "/memo/list",
                 data: {},
+                url: '/memo/list',
                 success: (res) => {
+
                     if (res['result'] == 'success') {
                         let list = res['list']
-                        for (let i = 0; i < list.length; i++) {
-                            let title = list[i]['title']
-                            let text = list[i]['text']
-                        
 
-                            let tempHtml = `<div class="card">
-                                            <div class="card-body${i+1}" id="cardBody" >
-                                            <h5 class="card-title${i+1}">${title}</h5>
-                                            <p class="card-text${i+1}">${text}</p>
-                                            <button onclick="modChange(${i+1})" id="card-btn" class="btn-update" type="submit" >수정</button>
-                                            <button onclick="cardDelete(${i+1})" id="card-btn"  class="btn-delete" type="submit" >삭제</button>
+                        for (i in list) {
+
+                            let temp = `<div class="card" id="card${list[i]['_id']}">
+                                    <div class="card-body" id="cardBody" >
+                                    <h5 class="card-title">${list[i]['title']}</h5>
+                                    <p class="card-text">${list[i]['text']}</p>
+                                    <button onclick="modChange(${list[i]['_id']})" id="card-btn" class="btn-update" type="submit" >수정</button>
+                                    <button onclick="cardDelete(${list[i]['_id']})" id="card-btn"  class="btn-delete" type="submit" >삭제</button>
               
-                                            </div>
-                                            <div class="mod-body${i+1}" id="cardBody" style="display:none">
-                                            <input id="mod" class="mod-title${i+1}"placeholder="${i+1}번째 내용을 입력합니다." value="${title}">
-                                            <textarea id="mod" class="mod-text${i+1}" placeholder="${i+1}번째 내용을 입력합니다.">${text}</textarea>
-                                            <button onclick="cardUpdate(${i+1})" id="card-btn"  class="btn-save" type="submit" >저장</button>
-                                            </div>
-                                            </div>`
-                            $('#card-list').append(tempHtml)
-
+                                     </div>
+                                    <div class="mod-body" id="cardBody" style="display:none">
+                                    <input id="mod" class="mod-title"placeholder="${list[i]['_id']}번째 제목을 입력합니다." value="${list[i]['title']}">
+                                    <textarea id="mod" class="mod-text" placeholder="${list[i]['_id']}번째 내용을 입력합니다.">${list[i]['text']}</textarea>
+                                    <button onclick="cardUpdate(${list[i]['_id']})" id="card-btn"  class="btn-save" type="submit" >저장</button>
+                                    </div>
+                                    </div>`
+                            $('#card-list').append(temp)
                         }
+
+
+
                     }
+
                 }
             })
 
+
         }
         function modChange(num) {
-            if ($(`.mod-body${num}`).css('display') == 'block') {
-                $(`.mod-body${num}`).hide()
-                $(`.card-body${num}`).show()
+           
+            if ($(`#card${num} > .card-body`).css('display') == 'block') {
+                $(`#card${num} > .card-body`).hide()
+                $(`#card${num} > .mod-body`).show()
+
             } else {
-                $(`.mod-body${num}`).show()
-                $(`.card-body${num}`).hide()
+                $(`#card${num} > .mod-body`).hide()
+                $(`#card${num} > .card-body`).show()
             }
+
+
         }
 
         //카드 제출하기
         function cardAdd() {
-            let title = $("#input-title").val();
-            let text = $("#input-text").val();
+            title = $('#input-title').val();
+            text = $('#input-text').val();
+
             $.ajax({
                 type: "POST",
                 url: "/memo/add",
                 data: { "title": title, "text": text },
                 success: (res) => {
                     if (res['result'] == 'success') {
-                        console.log(res['seq']);
-                        alert("저장 완료!")
-                        showCards();
-                        $("#input-title").val("");
-                        $("#input-text").val("");
-                    }else{
-                        alert("같은 제목이 존재합니다.")
+                        alert("추가 완료했습니다.")
+                        showCards()
                     }
                 }
             })
+
         }
 
 
         //카드 수정
         function cardUpdate(num) {
-            let firstT = $(`.card-title${num}`).text();
-            let title = $(`.mod-title${num}`).val();
-            let text = $(`.mod-text${num}`).val();
+            let id = num;
+            let title = $(`#card${num} > .mod-body > .mod-title`).val()
+            let text = $(`#card${num} > .mod-body > .mod-text`).val()
+
             $.ajax({
-                type: "POST",
-                url: "/memo/update",
-                data: {"first" : firstT ,"title" : title, "text" : text},
-                success: (res)=>{
-                    if(res['result'] =='success'){
-                        alert("수정 완료!")
-                        showCards();
-                    }else{
-                        alert("같은 제목이 존재합니다.")
+                type: 'POST',
+                url: '/memo/update',
+                data: { "id": num, "title": title, "text": text },
+                success: (res) => {
+                    if (res['result'] == 'success') {
+                        alert('수정했습니다.')
+                        showCards()
+                        modChange(id)
                     }
                 }
+
             })
 
         }
 
         //카드 삭제
         function cardDelete(num) {
-            let title = $(`.mod-title${num}`).val();
             $.ajax({
-                type:'POST',
-                url:'/memo/delete',
-                data:{'title':title},
-                success: (res)=>{
-                    if(res['result'] == 'success'){
-                        alert("삭제 완료!")
-                        showCards();
+                type: 'POST',
+                url: '/memo/delete',
+                data: { "id": num },
+                success: (res) => {
+                    if (res['result'] == 'success') {
+                        alert('삭제했습니다.')
+                        showCards()
+
                     }
                 }
+
             })
         }
 
@@ -228,32 +235,32 @@
         </div>
         <div id="card-list" class="card-columns">
             <div class="card">
-                <div class="card-body" >
+                <div class="card-body">
                     <h5 class="card-title">첫번째 내용을 수정합니다.</h5>
                     <p class="card-text">첫번째 내용을 수정합니다.</p>
-                    <button onclick="modChange()" id="card-btn" class="btn-update" type="submit" >수정</button>
-                    <button onclick="cardDelete()" id="card-btn"  class="btn-delete" type="submit" >삭제</button>
-              
+                    <button onclick="modChange()" id="card-btn" class="btn-update" type="submit">수정</button>
+                    <button onclick="cardDelete()" id="card-btn" class="btn-delete" type="submit">삭제</button>
+
                 </div>
                 <div class="mod-body" style="display:none">
-                    <input id="mod" class="mod-title"placeholder="첫번째 제목을 입력합니다.">
+                    <input id="mod" class="mod-title" placeholder="첫번째 제목을 입력합니다.">
                     <textarea id="mod" class="mod-text" placeholder="첫번째 내용을 입력합니다."></textarea>
-                    <button onclick="cardUpdate()" id="card-btn"  class="btn-save" type="submit" >저장</button>
+                    <button onclick="cardUpdate()" id="card-btn" class="btn-save" type="submit">저장</button>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-body"style="display:none" >
+                <div class="card-body" style="display:none">
                     <h5 class="card-title">첫번째 내용을 수정합니다.</h5>
                     <p class="card-text">첫번째 내용을 수정합니다.</p>
-                    <button onclick="modChange()" id="card-btn" class="btn-update" type="submit" >수정</button>
-                    <button onclick="cardDelete()" id="card-btn"  class="btn-delete" type="submit" >삭제</button>
-              
+                    <button onclick="modChange()" id="card-btn" class="btn-update" type="submit">수정</button>
+                    <button onclick="cardDelete()" id="card-btn" class="btn-delete" type="submit">삭제</button>
+
                 </div>
                 <div class="mod-body">
-                    <input id="mod" class="mod-title"placeholder="첫번째 제목을 입력합니다.">
+                    <input id="mod" class="mod-title" placeholder="첫번째 제목을 입력합니다.">
                     <textarea id="mod" class="mod-text" placeholder="첫번째 내용을 입력합니다."></textarea>
-                    <button onclick="cardUpdate()" id="card-btn"  class="btn-save" type="submit" >저장</button>
+                    <button onclick="cardUpdate()" id="card-btn" class="btn-save" type="submit">저장</button>
                 </div>
             </div>
 
