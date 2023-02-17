@@ -98,20 +98,172 @@
         });
         //댓글 보여주기
         function showComments() {
+            $('#card-list').empty()
+            $.ajax({
+                type: "GET",
+                data: {},
+                url: '/feedback/list',
+                success: (res) => {
+
+                    if (res['result'] == 'success') {
+                        let list = res['list']
+
+                        for (i in list) {
+
+                            let temp = `<li id=${list[i]['_id']}>
+                        <div id="comments${list[i]['_id']}"
+                            style="display: flex; flex:1; flex-direction: row; border: 1px solid white; border-left: 1px; border-right: 1px;  align-items: center;">
+                            <div style="display:flex; flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white;">${list[i]['name']}</p>
+                            </div>
+
+                            <div style="display:flex;flex:10; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white">${list[i]['contents']}</p>
+
+                            </div>
+
+                            <div style="display: flex;flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px;  flex-direction: row; padding-left: 20px; justify-content: space-between;">
+                                <p style="color: white; padding-top:20px;">
+                                    ${list[i]['date']}
+                                </p>
+                                <div style="display: flex; flex-direction: row;">
+                                <button onclick="modChange(${list[i]['_id']})">수정</button>
+                                <button onclick="delComments(${list[i]['_id']})">삭제</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="mod${list[i]['_id']}"
+                            style="display: none; flex:1; flex-direction: row; border: 1px solid white; border-left: 1px; border-right: 1px;  align-items: center;">
+                            <div style="display:flex; flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white;">테스트</p>
+                            </div>
+
+                            <div style="display:flex;flex:10; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white">테스트</p>
+
+                            </div>
+
+                            <div style="display: flex;flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px;  flex-direction: row; padding-left: 20px; justify-content: space-between;">
+                                <p style="color: white; padding-top:20px;">
+                                   테스트
+                                </p>
+                                <div style="display: flex; flex-direction: row;">
+                                <button onclick="modChange(${list[i]['_id']})">수정</button>
+                                <button onclick="delComments(${list[i]['_id']})">삭제</button>
+                                </div>
+                            </div>
+                        </div>
+                    
+                    </li>`
+                            $('#card-list').append(temp)
+                        }
+
+
+
+                    }
+
+                }
+            })
+        }
+        function modChange(number){
+            console.log(number);
+            console.log($(`#comments${number}`).css('display'));
+           if( $(`#comments${number}`).css('display') == 'flex'){
+                $(`#comments${number}`).hide()
+                $(`#mod${number}`).show()
+            }else{
+                $(`#mod${number}`).hide()
+                $(`#comments${number}`).show()
+            }
+        }
+
+
+
+        //댓글 등록
+        function addComments() {
+            name = $('#name').val();
+            pw = $('#password').val();
+            contents = $('#contents').val();
+
+            if(name.length > 12){
+                alert("이름은 열두자리까지만 입력 가능합니다.")
+            }else{
+                $.ajax({
+                type: "POST",
+                url: "/feedback/list/add",
+                data: { "name": name, "pw": pw, "contents": contents },
+                success: (res) => {
+                    if (res['result'] == 'success') {
+                        alert("추가 완료했습니다.")
+                        showComments()
+                    }
+                }
+            })
+            }
+           
+        }
+
+        //대댓글 등록
+        function addRecomments() {
 
         }
 
-        //댓글 등록
-
-        //대댓글 등록
-
         //댓글 수정
+        function upComments() {
+
+        }
 
         //대댓글 수정
+        function upReComments() {
+
+        }
 
         //댓글 삭제
+        function delComments(number) {
+            var pwCheck = prompt("비밀번호를 입력해주세요", "");
+            $.ajax({
+                type: "GET",
+                data: {},
+                url: '/feedback/list',
+                success: (res) => {
+                    if (res['result'] == 'success') {
+                        let list = res['list']
+                        for (i in list) {
+                            if (list[i]['_id'] == number) {
+                                check = list[i]['pw']
+                                if (pwCheck == check) {
+
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "/feedback/list/delete",
+                                        data: { "id": number },
+                                        success: (res) => {
+                                            if (res['result'] == 'success') {
+                                                alert("삭제 완료했습니다.")
+                                                showComments()
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+
+                        }
+
+
+                    }
+                }
+            })
+
+
+
+
+        }
 
         //대댓글 삭제
+        function delRecomments() {
+
+        }
 
 
 
@@ -131,18 +283,23 @@
         display: flex;
         align-items: center;
         ">
-
-
-            <div style="display: flex; height: 60px; width: 100%; margin-left: 50px; margin-right: 50px; flex-direction: row; justify-content: space-between; align-items: center;">
-                <div style="display: flex;background-color: green; border-radius: 40px; width: 220px; justify-content: center; align-items: center;">
+            <div
+                style="display: flex; height: 60px; width: 100%; margin-left: 50px; margin-right: 50px; flex-direction: row; justify-content: space-between; align-items: center;">
+                <div
+                    style="display: flex;background-color: green; border-radius: 40px; width: 220px; justify-content: center; align-items: center;">
                     <h1 onclick="location.href='/'" style="color:white; text-align: center;">SpringTree</text>
                 </div>
 
-                <div style="display: flex;background-color: white; border-radius: 40px; width: 150px; padding:10px; justify-content: space-around; align-items: center;">
-                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg" onclick="location.href='/'"/>
-                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg" onclick="location.href='/'"/>
-                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg" onclick="location.href='/'"/>
-                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg" onclick="location.href='/'"/>
+                <div
+                    style="display: flex;background-color: white; border-radius: 40px; width: 150px; padding:10px; justify-content: space-around; align-items: center;">
+                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg"
+                        onclick="location.href='/'" />
+                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg"
+                        onclick="location.href='/'" />
+                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg"
+                        onclick="location.href='/'" />
+                    <img style="width: 24px; height: 24px; " src="../static/phone-solid.svg"
+                        onclick="location.href='/'" />
                 </div>
             </div>
 
@@ -152,25 +309,148 @@
 
         </div>
         <!-- 설명, 댓글 -->
-        <div style="width: 100% ;height:100%; background-color: #2E2E2E;  overflow-y: scroll; padding-left: 100px; padding-right: 100px;">
-            <div style="padding-top: 150px;  border-width: 10px; border-color: white; border-radius: 10px;" >
-                <h3 style="color:white">안녕하세요~! 앞으로의 많은 경험을 스스로 판단하지 않고 객관적으로 평가를 받기 위해서 만든 공간입니다. 
-                    페이지를 보고 좋았던 부분이나 보완할 부분, 추가되었으면 하는 부분, 마음에 안들었던 부분을 자유롭게 적어주시면 감사하겠습니다. 
+        <div
+            style="width: 100% ;height:100%; background-color: #2E2E2E;  overflow-y: scroll; padding-left: 100px; padding-right: 100px;">
+            <div style="padding-top: 150px;  border-width: 10px; border-color: white; border-radius: 10px;">
+                <h3 style="color:white">안녕하세요~! 앞으로의 많은 경험을 스스로 판단하지 않고 객관적으로 평가를 받기 위해서 만든 공간입니다.
+                    페이지를 보고 좋았던 부분이나 보완할 부분, 추가되었으면 하는 부분, 마음에 안들었던 부분을 자유롭게 적어주시면 감사하겠습니다.
                     항상 건강하고 행복하셨으면 좋겠습니다.</h1>
             </div>
 
-            <div style="display: flex; flex-direction: row;">
-                <div style="display: flex; flex-direction:column">
-                    <input type="text" placeholder="이름"></input>
-                    <input type="password" placeholder="비밀번호"></input>
-                    <textarea placeholder="내용을 입력하세요"></textarea>
-                </div>
-                
-                <button>버튼</button>
+
+            <div style="display: flex; flex-direction: column;  width: 100%;">
+                <ul id="card-list">
+                    <li>
+                        <div
+                            style="display: flex; flex:1; flex-direction: row; border: 1px solid white; border-left: 1px; border-right: 1px;  align-items: center;">
+                            <div
+                                style="display:flex; flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white;">123412341234</p>
+                            </div>
+
+                            <div
+                                style="display:flex;flex:10; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white">내용</p>
+
+                            </div>
+
+                            <div
+                                style="display: flex;flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px;  flex-direction: row; padding-left: 20px; justify-content: space-between;">
+                                <p style="color: white; padding-top:20px;">
+                                    날짜
+                                </p>
+                                <button>삭제</button>
+                            </div>
+                        </div>
+
+                    </li>
+
+                    <li>
+                        <div
+                            style="display: flex; flex:1; flex-direction: row; border: 1px solid white; border-top: 1px; border-bottom: 1px; border-right: 1px;  align-items: center; margin-left:100px;">
+                            <div
+                                style="display:flex; flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white;">123412341234</p>
+                            </div>
+
+                            <div
+                                style="display:flex;flex:10; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white">내용</p>
+
+                            </div>
+
+                            <div
+                                style="display: flex;flex:2.2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px;  flex-direction: row; padding-left: 20px; justify-content: space-between;">
+                                <p style="color: white; padding-top:20px;">
+                                    날짜
+                                </p>
+                                <button>삭제</button>
+                            </div>
+                        </div>
+                        <div
+                            style="display: flex; flex:1; flex-direction: row; border: 1px solid white; border-top: 1px; border-bottom: 1px; border-right: 1px;  align-items: center; margin-left:100px;">
+                            <div
+                                style="display:flex; flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white;">123412341234</p>
+                            </div>
+
+                            <div
+                                style="display:flex;flex:10; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white">내용</p>
+
+                            </div>
+
+                            <div
+                                style="display: flex;flex:2.2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px;  flex-direction: row; padding-left: 20px; justify-content: space-between;">
+                                <p style="color: white; padding-top:20px;">
+                                    날짜
+                                </p>
+                                <button>삭제</button>
+                            </div>
+                        </div>
+
+                    </li>
+
+                    <li>
+                        <div
+                            style="display: flex; flex:1; flex-direction: row; border: 1px solid white; border-left: 1px; border-right: 1px;  align-items: center;">
+                            <div
+                                style="display:flex; flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white;">123412341234</p>
+                            </div>
+
+                            <div
+                                style="display:flex;flex:10; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px; padding-top:20px; padding-left: 10px;">
+                                <p style="color: white">내용</p>
+
+                            </div>
+
+                            <div
+                                style="display: flex;flex:2; border: 1px solid white; border-bottom: 1px; border-left: 1px; border-top:1px;  flex-direction: row; padding-left: 20px; justify-content: space-between;">
+                                <p style="color: white; padding-top:20px;">
+                                    날짜
+                                </p>
+                                <button>삭제</button>
+                            </div>
+                        </div>
+
+                    </li>
+
+                </ul>
+
+
+
+
             </div>
+            <div style="display: flex; padding: 40px;">
 
 
+                <div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">
+                    <div style="display: flex; flex-direction:column">
+                        <div style="display: flex; flex-direction: row;">
+                            <input id="name" style="display: flex ;width: 100px; margin: 10px;" type="texst"
+                                placeholder="이름"></input>
+                            <input id="password" style="display: flex ;width: 100px; margin: 10px;" type="password"
+                                placeholder="비밀번호"></input>
+                        </div>
+                        <textarea id="contents" style="display: flex ; height:150px; width: 900px; margin: 10px;"
+                            placeholder="내용을 입력하세요"></textarea>
+                    </div>
+
+
+
+                    <div style="display: flex; height: 100%; align-items: end;">
+                        <button onclick="addComments()" type="button" class="btn btn-primary btn-lg"
+                            style="height: 30%; width: 200px;">등록</button>
+                    </div>
+
+                </div>
+
+            </div>
         </div>
+
+
+    </div>
 
     </div>
 </body>
