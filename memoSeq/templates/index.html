@@ -21,19 +21,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 
 
-    <title>나홀로 메모장 2.0</title>
+    <title>크래프톤 정글 | 나홀로 메모장</title>
 
     <!-- style -->
     <style type="text/css">
+        /* 폰트 */
         * {
             font-family: 'Jua', sans-serif;
         }
-
+        /* 메모 입력란 */
         .wrap {
             width: 900px;
             margin: auto;
         }
+        #post-box {
+            width: 400px;
 
+        }
 
         #title_ver {
             font-size: 50px;
@@ -45,48 +49,87 @@
 
         }
 
-        #input-text {
+        #memo-content {
             margin-bottom: 10px;
         }
 
-        #input-title {
+        #memo-title {
             margin-bottom: 10px;
         }
 
-        .btn-update {
-            background-color: rgb(110, 157, 180);
-        }
-
-        .btn-delete {
-            background-color: rgb(176, 80, 75);
-        }
-
-        .btn-save {
-            background-color: rgb(115, 161, 84);
-        }
-
-        #cardBody {
+        /* 카드 콘텐츠 */
+        .card-body {
             padding: 20px;
         }
 
-        #post-box {
-            width: 400px;
-
-        }
-
-        #card-btn {
+        .edit-button {
             height: 25px;
             width: 40px;
-            text-align: center;
             border-radius: 5px;
             border-width: 0px;
             font-size: 15px;
             color: white;
+            margin-right: 5px;
+            background-color: rgb(110, 157, 180);
         }
 
-        #mod {
+        .delete-button {
+            height: 25px;
+            width: 40px;
+            border-radius: 5px;
+            border-width: 0px;
+            font-size: 15px;
+            color: white;
+            margin-right: 5px;
+            background-color: rgb(176, 80, 75);
+        }
+        .link-like {
+            color: skyblue;
+
+
+        }
+
+        .contents-box {
+            margin-bottom: 20px;
+        }
+
+        .btn-box{
+            display: flex; flex-direction: row;
+        }
+
+
+        /* 카드 수정 */
+        .mod-body{
+            padding: 20px;
+        }
+
+        .new-title {
             width: 100%;
             margin-bottom: 10px;
+        }
+
+        .new-text {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .save-button {
+            height: 25px;
+            width: 40px;
+            border-radius: 5px;
+            border-width: 0px;
+            font-size: 15px;
+            color: white;
+            background-color: rgb(115, 161, 84);
+        }
+        .cancel-button {
+            height: 25px;
+            width: 40px;
+            border-radius: 5px;
+            border-width: 0px;
+            font-size: 15px;
+            color: white;
+            background-color: rgb(180, 12, 20);
         }
     </style>
     <script>
@@ -109,20 +152,28 @@
 
                         for (i in list) {
 
-                            let temp = `<div class="card" id="card${list[i]['_id']}">
-                                    <div class="card-body" id="cardBody" >
-                                    <h5 class="card-title">${list[i]['title']}</h5>
-                                    <p class="card-text">${list[i]['text']}</p>
-                                    <button onclick="modChange(${list[i]['_id']})" id="card-btn" class="btn-update" type="submit" >수정</button>
-                                    <button onclick="cardDelete(${list[i]['_id']})" id="card-btn"  class="btn-delete" type="submit" >삭제</button>
-              
-                                     </div>
-                                    <div class="mod-body" id="cardBody" style="display:none">
-                                    <input id="mod" class="mod-title"placeholder="${list[i]['_id']}번째 제목을 입력합니다." value="${list[i]['title']}">
-                                    <textarea id="mod" class="mod-text" placeholder="${list[i]['_id']}번째 내용을 입력합니다.">${list[i]['text']}</textarea>
-                                    <button onclick="cardUpdate(${list[i]['_id']})" id="card-btn"  class="btn-save" type="submit" >저장</button>
+                            let temp = `
+                            <div class="card" id="card${list[i]['_id']}">
+                                <div class="card-body" >
+                                    <div class="contents-box">
+                                        <h5 class="card-title">${list[i]['title']}</h5>
+                                        <p class="card-text">${list[i]['text']}</p>
+                                        <text class="card-likes">${list[i]['like']}</text>
                                     </div>
-                                    </div>`
+                                    <div class="btn-box">
+                                        <button onclick="modChange(${list[i]['_id']})" class="edit-button" type="submit" >수정</button>
+                                        <button onclick="cardDelete(${list[i]['_id']})"  class="delete-button" type="submit" >삭제</button>
+                                        <a onclick="likeBtn(${list[i]['_id']})"class="link-like" type="submit" >좋아요!</a>
+                                        <text>👍</text>
+                                    </div>
+                                </div>
+                                <div class="mod-body" style="display:none">
+                                    <input  class="new-title"placeholder="${list[i]['title']}" value="${list[i]['title']}">
+                                    <textarea  class="new-text" placeholder="${list[i]['text']}">${list[i]['text']}</textarea>
+                                    <button onclick="cardUpdate(${list[i]['_id']})" class="save-button" >저장</button>
+                                    <button onclick="modChange(${list[i]['_id']})" class="cancel-button">취소</button>
+                                </div>
+                            </div>`
                             $('#card-list').append(temp)
                         }
 
@@ -135,8 +186,9 @@
 
 
         }
+        //수정 시 form 변경
         function modChange(num) {
-           
+
             if ($(`#card${num} > .card-body`).css('display') == 'block') {
                 $(`#card${num} > .card-body`).hide()
                 $(`#card${num} > .mod-body`).show()
@@ -151,8 +203,8 @@
 
         //카드 제출하기
         function cardAdd() {
-            title = $('#input-title').val();
-            text = $('#input-text').val();
+            title = $('#memo-title').val();
+            text = $('#memo-content').val();
 
             $.ajax({
                 type: "POST",
@@ -160,8 +212,8 @@
                 data: { "title": title, "text": text },
                 success: (res) => {
                     if (res['result'] == 'success') {
-                        alert("추가 완료했습니다.")
-                        showCards()
+                        alert("포스팅 성공!")
+                        window.location.reload()
                     }
                 }
             })
@@ -172,8 +224,8 @@
         //카드 수정
         function cardUpdate(num) {
             let id = num;
-            let title = $(`#card${num} > .mod-body > .mod-title`).val()
-            let text = $(`#card${num} > .mod-body > .mod-text`).val()
+            let title = $(`#card${num} > .mod-body > .new-title`).val()
+            let text = $(`#card${num} > .mod-body > .new-text`).val()
 
             $.ajax({
                 type: 'POST',
@@ -181,8 +233,8 @@
                 data: { "id": num, "title": title, "text": text },
                 success: (res) => {
                     if (res['result'] == 'success') {
-                        alert('수정했습니다.')
-                        showCards()
+                        alert('수정완료!')
+                        window.location.reload()
                         modChange(id)
                     }
                 }
@@ -199,12 +251,27 @@
                 data: { "id": num },
                 success: (res) => {
                     if (res['result'] == 'success') {
-                        alert('삭제했습니다.')
-                        showCards()
+                        alert('삭제완료!')
+                        window.location.reload()
 
                     }
                 }
 
+            })
+        }
+
+        //좋아요!
+        function likeBtn(num) {
+            $.ajax({
+                type:"POST",
+                url:'/memo/like',
+                data: {"id":num},
+                success:(res)=>{
+                    if (res['result'] == 'success') {
+                        window.location.reload()
+
+                    }
+                }
             })
         }
 
@@ -223,10 +290,10 @@
             <div id="post-box" class="form-post">
                 <div>
                     <div class="form-group">
-                        <input id="input-title" class="form-control" placeholder="제목을 입력하세요.">
+                        <input id="memo-title" class="form-control" placeholder="제목을 입력하세요.">
                     </div>
                     <div class="form-group">
-                        <textarea id="input-text" class="form-control" rows="2" placeholder="내용을 입력하세요"></textarea>
+                        <textarea id="memo-content" class="form-control" rows="2" placeholder="내용을 입력하세요"></textarea>
                     </div>
                     <button onclick="cardAdd()" id="btn-post-box" type="submit" class="btn btn-primary">저장하기
                     </button>
@@ -235,32 +302,28 @@
         </div>
         <div id="card-list" class="card-columns">
             <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">첫번째 내용을 수정합니다.</h5>
-                    <p class="card-text">첫번째 내용을 수정합니다.</p>
-                    <button onclick="modChange()" id="card-btn" class="btn-update" type="submit">수정</button>
-                    <button onclick="cardDelete()" id="card-btn" class="btn-delete" type="submit">삭제</button>
+                <div class="card-body" id="cardBody">
+                    <div class="contents-box">
+                        <h5 class="card-title">첫번째 내용을 수정합니다.</h5>
+                        <p class="card-text">첫번째 내용을 수정합니다.</p>
+                        <text class="card-likes">0</text>
+                    </div>
+                    <div class="btn-box">
+                        <button onclick="modChange()"  class="edit-button" type="submit">수정</button>
+                        <button onclick="cardDelete()"  class="delete-button" type="submit">삭제</button>
+                        <a onclick="likeBtn()" class="link-like" type="submit">좋아요!</a>
+                        <text>👍</text>
+                    </div>
 
-                </div>
-                <div class="mod-body" style="display:none">
-                    <input id="mod" class="mod-title" placeholder="첫번째 제목을 입력합니다.">
-                    <textarea id="mod" class="mod-text" placeholder="첫번째 내용을 입력합니다."></textarea>
-                    <button onclick="cardUpdate()" id="card-btn" class="btn-save" type="submit">저장</button>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-body" style="display:none">
-                    <h5 class="card-title">첫번째 내용을 수정합니다.</h5>
-                    <p class="card-text">첫번째 내용을 수정합니다.</p>
-                    <button onclick="modChange()" id="card-btn" class="btn-update" type="submit">수정</button>
-                    <button onclick="cardDelete()" id="card-btn" class="btn-delete" type="submit">삭제</button>
-
-                </div>
                 <div class="mod-body">
-                    <input id="mod" class="mod-title" placeholder="첫번째 제목을 입력합니다.">
-                    <textarea id="mod" class="mod-text" placeholder="첫번째 내용을 입력합니다."></textarea>
-                    <button onclick="cardUpdate()" id="card-btn" class="btn-save" type="submit">저장</button>
+                    <input  class="new-title" placeholder="첫번째 제목을 입력합니다.">
+                    <textarea  class="new-text" placeholder="첫번째 내용을 입력합니다."></textarea>
+                    <button onclick="cardUpdate()" class="save-button">저장</button>
+                    <button onclick="modChange()" class="cancel-button">취소</button>
                 </div>
             </div>
 
